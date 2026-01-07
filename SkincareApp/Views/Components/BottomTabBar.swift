@@ -3,14 +3,12 @@ import SwiftUI
 enum Tab: Int, CaseIterable {
     case home
     case scan
-    case routine
     case profile
 
     var icon: String {
         switch self {
         case .home: "house.fill"
         case .scan: "camera.fill"
-        case .routine: "list.bullet.clipboard.fill"
         case .profile: "person.fill"
         }
     }
@@ -19,7 +17,6 @@ enum Tab: Int, CaseIterable {
         switch self {
         case .home: "Home"
         case .scan: "Scan"
-        case .routine: "Routine"
         case .profile: "Profile"
         }
     }
@@ -27,61 +24,56 @@ enum Tab: Int, CaseIterable {
 
 struct BottomTabBar: View {
     @Binding var selectedTab: Tab
+    var onScanTapped: (() -> Void)?
+
+    // Colors
+    static let charcoal = Color(red: 0.17, green: 0.17, blue: 0.18)
+    static let pureBlack = Color.black
+
+    // Spacing constants
+    private let standardPadding: CGFloat = 16
+    private let largePadding: CGFloat = 24
+
+    private var backgroundColor: Color {
+        selectedTab == .scan ? BottomTabBar.pureBlack.opacity(0.6) : BottomTabBar.charcoal
+    }
 
     var body: some View {
         HStack(spacing: 0) {
             ForEach(Tab.allCases, id: \.rawValue) { tab in
-                tabButton(for: tab)
-            }
-        }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 12)
-        .background {
-            RoundedRectangle(cornerRadius: 24)
-                .fill(.ultraThinMaterial)
-                .shadow(color: .black.opacity(0.1), radius: 20, y: 10)
-        }
-        .padding(.horizontal, 20)
-        .padding(.bottom, 20)
-    }
+                Button {
+                    if tab == .scan && selectedTab == .scan {
+                        onScanTapped?()
+                    } else {
+                        withAnimation(.easeInOut(duration: 0.15)) {
+                            selectedTab = tab
+                        }
+                    }
+                } label: {
+                    VStack(spacing: 4) {
+                        Image(systemName: tab.icon)
+                            .font(.system(size: 24))
+                            .symbolEffect(.bounce.down, value: selectedTab == tab)
 
-    private func tabButton(for tab: Tab) -> some View {
-        Button {
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
-                selectedTab = tab
-            }
-        } label: {
-            VStack(spacing: 4) {
-                Image(systemName: tab.icon)
-                    .font(.system(size: 22, weight: .medium))
-                    .symbolEffect(.bounce, value: selectedTab == tab)
-
-                Text(tab.title)
-                    .font(.caption2)
-                    .fontWeight(.medium)
-            }
-            .foregroundStyle(selectedTab == tab ? Color.sageGreen : .white.opacity(0.6))
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-            .background {
-                if selectedTab == tab {
-                    Capsule()
-                        .fill(Color.sageGreen.opacity(0.15))
-                        .padding(.horizontal, 4)
+                        Text(tab.title)
+                            .font(.system(size: 10, weight: .medium))
+                    }
+                    .foregroundStyle(selectedTab == tab ? .white : .white.opacity(0.5))
+                    .frame(maxWidth: .infinity)
                 }
+                .buttonStyle(.plain)
             }
         }
-        .buttonStyle(.plain)
+        .padding(.top, 10)
+        .padding(.bottom, 8)
+        .background(backgroundColor)
     }
 }
 
 #Preview {
-    ZStack {
-        Color.black.ignoresSafeArea()
-
-        VStack {
-            Spacer()
-            BottomTabBar(selectedTab: .constant(.scan))
-        }
+    VStack {
+        Spacer()
+        BottomTabBar(selectedTab: .constant(.scan))
     }
+    .background(Color.black)
 }

@@ -2,17 +2,22 @@ import AVFoundation
 import SwiftUI
 
 @Observable
-final class CameraViewModel {
+@MainActor
+final class CameraViewModel: NSObject {
     var isSessionRunning = false
-    var isFrontCamera = true
+    var isFrontCamera = false
     var capturedImage: UIImage?
     var permissionGranted = false
+    var onPhotoCaptured: ((UIImage) -> Void)?
+    var showResultCard = false
+    var showCapturedImage = false
 
-    private let session = AVCaptureSession()
-    private var currentInput: AVCaptureDeviceInput?
-    private let photoOutput = AVCapturePhotoOutput()
+    // AVCaptureSession is thread-safe and manages its own synchronization
+    nonisolated(unsafe) private let session = AVCaptureSession()
+    nonisolated(unsafe) private var currentInput: AVCaptureDeviceInput?
+    nonisolated(unsafe) private let photoOutput = AVCapturePhotoOutput()
 
-    var captureSession: AVCaptureSession {
+    nonisolated var captureSession: AVCaptureSession {
         session
     }
 
@@ -23,7 +28,7 @@ final class CameraViewModel {
             setupSession()
         case .notDetermined:
             AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
-                DispatchQueue.main.async {
+                Task { @MainActor in
                     self?.permissionGranted = granted
                     if granted {
                         self?.setupSession()
@@ -111,5 +116,32 @@ final class CameraViewModel {
         }
 
         session.commitConfiguration()
+    }
+
+    func capturePhoto() {
+        let settings = AVCapturePhotoSettings()
+        photoOutput.capturePhoto(with: settings, delegate: self)
+    }
+
+    fileprivate func handleCapturedImage(_ image: UIImage) {
+        capturedImage = image
+        onPhotoCaptured?(image)
+    }
+}
+
+// MARK: - AVCapturePhotoCaptureDelegate
+
+extension CameraViewModel: AVCapturePhotoCaptureDelegate {
+    nonisolated func photoOutput(
+        _ output: AVCapturePhotoOutput,
+        didFinishProcessingPhoto photo: AVCapturePhoto,
+        error: Error?
+    ) {
+        guard let data = photo.fileDataRepresentation(),
+              let image = UIImage(data: data) else { return }
+
+        Task { @MainActor [weak self] in
+            self?.handleCapturedImage(image)
+        }
     }
 }
