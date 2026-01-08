@@ -4,16 +4,12 @@ import SwiftUI
 struct CameraView: View {
     @Bindable var viewModel: CameraViewModel
 
-    // Apple HIG: Standard spacing constants
+    // Layout constants
     private let standardPadding: CGFloat = 16
     private let largePadding: CGFloat = 24
-    private let gridUnit: CGFloat = 8
-
-    // Layout constants
     private let dynamicIslandOffset: CGFloat = 60
     private let tabBarHeight: CGFloat = 58
     private let safeAreaBottom: CGFloat = 34
-    private let captureButtonSize: CGFloat = 80
 
     // Animation state
     @State private var isPressing = false
@@ -80,19 +76,15 @@ struct CameraView: View {
     // MARK: - Top Controls
 
     private var topControls: some View {
-        HStack {
-            Spacer()
-
-            Button {
-                viewModel.flipCamera()
-            } label: {
-                Image(systemName: "camera.rotate")
-                    .font(.system(size: 22, weight: .medium))
-                    .foregroundStyle(.white)
-                    .padding(12)
-                    .background(.ultraThinMaterial)
-                    .clipShape(Circle())
-            }
+        Button {
+            viewModel.flipCamera()
+        } label: {
+            Image(systemName: "camera.rotate")
+                .font(.system(size: 22, weight: .medium))
+                .foregroundStyle(.white)
+                .padding(12)
+                .background(.ultraThinMaterial)
+                .clipShape(Circle())
         }
     }
 

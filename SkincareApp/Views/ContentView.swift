@@ -5,9 +5,6 @@ struct ContentView: View {
     @State private var cameraViewModel = CameraViewModel()
     @State private var cardOffset: CGFloat = 0
 
-    // Spacing constants
-    private let standardPadding: CGFloat = 16
-    private let largePadding: CGFloat = 24
     private let cardHeight: CGFloat = 400
 
     private var tabBarBackground: Color {

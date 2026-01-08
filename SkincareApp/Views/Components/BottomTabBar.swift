@@ -26,17 +26,8 @@ struct BottomTabBar: View {
     @Binding var selectedTab: Tab
     var onScanTapped: (() -> Void)?
 
-    // Colors
     static let charcoal = Color(red: 0.17, green: 0.17, blue: 0.18)
     static let pureBlack = Color.black
-
-    // Spacing constants
-    private let standardPadding: CGFloat = 16
-    private let largePadding: CGFloat = 24
-
-    private var backgroundColor: Color {
-        selectedTab == .scan ? BottomTabBar.pureBlack.opacity(0.6) : BottomTabBar.charcoal
-    }
 
     var body: some View {
         HStack(spacing: 0) {
@@ -66,7 +57,6 @@ struct BottomTabBar: View {
         }
         .padding(.top, 10)
         .padding(.bottom, 8)
-        .background(backgroundColor)
     }
 }
 

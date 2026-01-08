@@ -4,11 +4,9 @@ import SwiftUI
 @Observable
 @MainActor
 final class CameraViewModel: NSObject {
-    var isSessionRunning = false
     var isFrontCamera = false
     var capturedImage: UIImage?
     var permissionGranted = false
-    var onPhotoCaptured: ((UIImage) -> Void)?
     var showResultCard = false
     var showCapturedImage = false
 
@@ -71,9 +69,6 @@ final class CameraViewModel: NSObject {
         guard !session.isRunning else { return }
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             self?.session.startRunning()
-            DispatchQueue.main.async {
-                self?.isSessionRunning = true
-            }
         }
     }
 
@@ -81,9 +76,6 @@ final class CameraViewModel: NSObject {
         guard session.isRunning else { return }
         DispatchQueue.global(qos: .userInitiated).async { [weak self] in
             self?.session.stopRunning()
-            DispatchQueue.main.async {
-                self?.isSessionRunning = false
-            }
         }
     }
 
@@ -125,7 +117,6 @@ final class CameraViewModel: NSObject {
 
     fileprivate func handleCapturedImage(_ image: UIImage) {
         capturedImage = image
-        onPhotoCaptured?(image)
     }
 }
 
